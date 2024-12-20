@@ -5,9 +5,7 @@ A delightful and user-friendly expense tracking application built with React. Ke
 ## ✨ Features
 
 - 📊 Visual expense analytics with charts
-- 🌙 Dark/Light mode support
-- 💾 Data persistence using Firebase
-- ⛅ Weather widget integration
+- 🌙 Data persistence using Firebase
 - 📱 Responsive design for all devices
 - 💫 Beautiful loading animations
 
@@ -54,7 +52,6 @@ The app will be available at [http://localhost:3000](http://localhost:3000).
 - [React](https://reactjs.org/) - Frontend framework
 - [Firebase](https://firebase.google.com/) - Backend and database
 - [Chart.js](https://www.chartjs.org/) - Data visualization
-- [OpenWeatherMap API](https://openweathermap.org/api) - Weather data
 
 ## 📝 License
 
