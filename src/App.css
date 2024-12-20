@@ -1231,3 +1231,83 @@
     margin-bottom: 30px; /* Maintain space after Wind on mobile */
   }
 }
+
+/* Dark mode styles */
+.dark-mode {
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.dark-mode .app-container {
+  background-color: #2d2d2d;
+}
+
+.dark-mode .expense-tracker-container,
+.dark-mode .expense-chart-container {
+  background-color: #363636;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode input,
+.dark-mode select {
+  background-color: #2d2d2d;
+  color: #ffffff;
+  border-color: #4a4a4a;
+}
+
+.dark-mode button {
+  background-color: #4a4a4a;
+  color: #ffffff;
+}
+
+.dark-mode button:hover {
+  background-color: #5a5a5a;
+}
+
+.dark-mode .dark-mode-toggle {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 8px;
+  font-size: 1.2rem;
+  transition: color 0.3s ease;
+}
+
+.dark-mode .dark-mode-toggle:hover {
+  color: #ffd700;
+}
+
+/* Light mode toggle button */
+.dark-mode-toggle {
+  background: transparent;
+  border: none;
+  color: #333333;
+  cursor: pointer;
+  padding: 8px;
+  font-size: 1.2rem;
+  transition: color 0.3s ease;
+}
+
+.dark-mode-toggle:hover {
+  color: #666666;
+}
+
+/* User menu layout */
+.user-menu {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  width: 100%;
+}
+
+.user-menu-left {
+  display: flex;
+  align-items: center;
+}
+
+.user-menu-right {
+  display: flex;
+  align-items: center;
+}

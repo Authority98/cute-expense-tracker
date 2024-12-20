@@ -5,7 +5,7 @@ import { collection, addDoc, query, orderBy, limit, onSnapshot, deleteDoc, doc, 
 import { auth, db, googleProvider } from './firebase';
 import ExpenseTracker from './components/ExpenseTracker';
 import ExpenseChart from './components/ExpenseChart';
-import WeatherWidget from './components/WeatherWidget';
+import DarkModeToggle from './components/DarkModeToggle';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
@@ -15,8 +15,25 @@ import { FaSignOutAlt, FaGoogle, FaTrash } from 'react-icons/fa';
 function App() {
   const [user, loading] = useAuthState(auth);
   const [expenses, setExpenses] = useState([]);
-  const [isLoadingExpenses, setIsLoadingExpenses] = useState(true); // Start with true
+  const [isLoadingExpenses, setIsLoadingExpenses] = useState(true);
   const [localExpenses, setLocalExpenses] = useState([]);
+  const [darkMode, setDarkMode] = useState(() => {
+    const savedMode = localStorage.getItem('darkMode');
+    return savedMode ? JSON.parse(savedMode) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode(prev => !prev);
+  };
 
   const fetchExpenses = useCallback(() => {
     if (user) {
@@ -172,31 +189,36 @@ function App() {
   console.log("Current state:", { user, loading, isLoadingExpenses, expensesCount: expenses.length });
 
   return (
-    <div className="App">
+    <div className={`App ${darkMode ? 'dark-mode' : ''}`}>
       <div className="app-container">
         <div className="user-menu">
-          {loading ? (
-            <div className="loading-text">Loading...</div>
-          ) : user ? (
-            <div className="user-menu-content">
-              <span className="greeting">Hi, {user.displayName}!</span>
-              <button className="sign-out-btn" onClick={signOutUser}>
-                <FaSignOutAlt /> Sign Out
-              </button>
-              {expenses.length > 0 && (
-                <button className="clear-all-btn" onClick={clearAllExpenses}>
-                  <FaTrash /> Clear All
+          <div className="user-menu-left">
+            {loading ? (
+              <div className="loading-text">Loading...</div>
+            ) : user ? (
+              <div className="user-menu-content">
+                <span className="greeting">Hi, {user.displayName}!</span>
+                <button className="sign-out-btn" onClick={signOutUser}>
+                  <FaSignOutAlt /> Sign Out
                 </button>
-              )}
-            </div>
-          ) : (
-            <div className="user-menu-content">
-              <span className="greeting">Login to save your data</span>
-              <button className="sign-in-btn" onClick={signIn}>
-                <FaGoogle /> Sign In
-              </button>
-            </div>
-          )}
+                {expenses.length > 0 && (
+                  <button className="clear-all-btn" onClick={clearAllExpenses}>
+                    <FaTrash /> Clear All
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="user-menu-content">
+                <span className="greeting">Login to save your data</span>
+                <button className="sign-in-btn" onClick={signIn}>
+                  <FaGoogle /> Sign In
+                </button>
+              </div>
+            )}
+          </div>
+          <div className="user-menu-right">
+            <DarkModeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+          </div>
         </div>
         <div className="left-column">
           <div className="expense-tracker-container">
