@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FaSync } from 'react-icons/fa';
 
 function ExpenseList({ expenses, onEdit, onDelete }) {
   const [editId, setEditId] = useState(null);
@@ -38,7 +39,14 @@ function ExpenseList({ expenses, onEdit, onDelete }) {
             </>
           ) : (
             <>
-              <span>{expense.item}</span>
+              <div className="expense-details">
+                <span>{expense.item}</span>
+                {expense.isRecurring && (
+                  <span className="recurring-indicator">
+                    <FaSync /> {expense.frequency}
+                  </span>
+                )}
+              </div>
               <span>Rs {expense.amount.toFixed(2)}</span>
               <button onClick={() => handleEdit(expense.id)}>Edit</button>
               <button onClick={() => onDelete(expense.id)}>Delete</button>

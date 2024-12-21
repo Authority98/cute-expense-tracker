@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { signInWithPopup, signOut } from 'firebase/auth';
-import { collection, addDoc, query, orderBy, limit, onSnapshot, deleteDoc, doc, setDoc, writeBatch } from 'firebase/firestore';
+import { collection, addDoc, query, orderBy, limit, onSnapshot, deleteDoc, doc, setDoc, writeBatch, getDocs, where } from 'firebase/firestore';
 import { auth, db, googleProvider } from './firebase';
 import ExpenseTracker from './components/ExpenseTracker';
 import ExpenseChart from './components/ExpenseChart';
@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import './styles/LiquidLoading.css';
 import { FaSignOutAlt, FaGoogle, FaTrash } from 'react-icons/fa';
+import { addDays, addWeeks, addMonths, addYears, isBefore, isAfter } from 'date-fns';
 
 function App() {
   const [user, loading] = useAuthState(auth);
@@ -21,6 +22,7 @@ function App() {
     const savedMode = localStorage.getItem('darkMode');
     return savedMode ? JSON.parse(savedMode) : false;
   });
+  const [isProcessingRecurring, setIsProcessingRecurring] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(darkMode));
@@ -81,19 +83,43 @@ function App() {
     try {
       const expenseWithDate = {
         ...expense,
-        date: new Date(expense.date).toISOString()
+        date: new Date(expense.date).toISOString(),
+        ...(expense.isRecurring && {
+          nextDueDate: new Date(expense.date).toISOString(),
+          endDate: expense.endDate ? new Date(expense.endDate).toISOString() : null,
+          lastProcessedDate: null,
+          status: 'active'
+        })
       };
+
       console.log("Adding expense:", expenseWithDate);
+      
       if (user) {
         // If user is logged in, add to Firestore
-        const docRef = await addDoc(collection(db, `users/${user.uid}/expenses`), expenseWithDate);
+        const collectionRef = collection(db, `users/${user.uid}/expenses`);
+        const docRef = await addDoc(collectionRef, expenseWithDate);
+        
+        // If it's a recurring expense, also add to recurring collection
+        if (expense.isRecurring) {
+          const recurringRef = collection(db, `users/${user.uid}/recurring_expenses`);
+          await addDoc(recurringRef, {
+            ...expenseWithDate,
+            originalExpenseId: docRef.id
+          });
+        }
+        
         console.log("Expense added to Firestore with ID:", docRef.id);
       } else {
         // If user is not logged in, add to local state with a temporary ID
-        const newLocalExpense = { ...expenseWithDate, id: `local_${Date.now()}` };
+        const newLocalExpense = { 
+          ...expenseWithDate, 
+          id: `local_${Date.now()}`,
+          isLocal: true
+        };
         setLocalExpenses(prevExpenses => [...prevExpenses, newLocalExpense]);
         setExpenses(prevExpenses => [...prevExpenses, newLocalExpense]);
       }
+      
       console.log("Expense added successfully");
       toast.success('Expense added successfully! 🎉');
     } catch (error) {
@@ -185,6 +211,92 @@ function App() {
       mergeLocalExpenses();
     }
   }, [user, localExpenses, db]);
+
+  const processRecurringExpenses = async () => {
+    if (!user || isProcessingRecurring) return;
+
+    try {
+      setIsProcessingRecurring(true);
+      const recurringRef = collection(db, `users/${user.uid}/recurring_expenses`);
+      const q = query(recurringRef, where('status', '==', 'active'));
+      const querySnapshot = await getDocs(q);
+
+      const batch = writeBatch(db);
+      const now = new Date();
+      let hasChanges = false;
+
+      for (const doc of querySnapshot.docs) {
+        const recurring = doc.data();
+        const nextDue = new Date(recurring.nextDueDate);
+
+        // Skip if next due date is in the future
+        if (isAfter(nextDue, now)) continue;
+
+        // Skip if end date exists and has passed
+        if (recurring.endDate && isAfter(now, new Date(recurring.endDate))) {
+          batch.update(doc.ref, { status: 'completed' });
+          hasChanges = true;
+          continue;
+        }
+
+        // Calculate next due date based on frequency
+        let nextDueDate;
+        switch (recurring.frequency) {
+          case 'daily':
+            nextDueDate = addDays(nextDue, 1);
+            break;
+          case 'weekly':
+            nextDueDate = addWeeks(nextDue, 1);
+            break;
+          case 'monthly':
+            nextDueDate = addMonths(nextDue, 1);
+            break;
+          case 'yearly':
+            nextDueDate = addYears(nextDue, 1);
+            break;
+          default:
+            continue;
+        }
+
+        // Create new expense
+        const expenseRef = doc(collection(db, `users/${user.uid}/expenses`));
+        batch.set(expenseRef, {
+          item: recurring.item,
+          amount: recurring.amount,
+          date: now.toISOString(),
+          isRecurring: true,
+          recurringId: doc.id
+        });
+
+        // Update recurring expense
+        batch.update(doc.ref, {
+          lastProcessedDate: now.toISOString(),
+          nextDueDate: nextDueDate.toISOString()
+        });
+
+        hasChanges = true;
+      }
+
+      if (hasChanges) {
+        await batch.commit();
+        fetchExpenses(); // Refresh expenses list
+      }
+    } catch (error) {
+      console.error("Error processing recurring expenses:", error);
+      toast.error('Failed to process recurring expenses');
+    } finally {
+      setIsProcessingRecurring(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      // Process recurring expenses when component mounts and every hour
+      processRecurringExpenses();
+      const interval = setInterval(processRecurringExpenses, 60 * 60 * 1000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   console.log("Current state:", { user, loading, isLoadingExpenses, expensesCount: expenses.length });
 

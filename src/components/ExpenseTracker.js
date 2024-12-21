@@ -2,26 +2,37 @@ import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { format } from 'date-fns';
-import { FaCalendarAlt, FaChevronDown, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaCalendarAlt, FaChevronDown, FaChevronLeft, FaChevronRight, FaSync } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
 function ExpenseTracker({ onAddExpense }) {
   const [item, setItem] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date());
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [frequency, setFrequency] = useState('monthly');
+  const [endDate, setEndDate] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (item && amount && date) {
-      console.log("Submitting expense:", { item, amount, date });
+      console.log("Submitting expense:", { item, amount, date, isRecurring, frequency, endDate });
       onAddExpense({ 
         item, 
         amount: parseFloat(amount), 
-        date: date.toISOString()
+        date: date.toISOString(),
+        isRecurring,
+        ...(isRecurring && {
+          frequency,
+          endDate: endDate ? endDate.toISOString() : null
+        })
       });
       setItem('');
       setAmount('');
       setDate(new Date());
+      setIsRecurring(false);
+      setFrequency('monthly');
+      setEndDate(null);
     } else {
       toast.error('Please fill in all fields');
     }
@@ -85,6 +96,59 @@ function ExpenseTracker({ onAddExpense }) {
             )}
           />
         </div>
+        <div className="recurring-toggle">
+          <label className="toggle-label">
+            <input
+              type="checkbox"
+              checked={isRecurring}
+              onChange={(e) => setIsRecurring(e.target.checked)}
+            />
+            <span className="toggle-text">
+              <FaSync className="recurring-icon" />
+              Recurring Expense
+            </span>
+          </label>
+        </div>
+        {isRecurring && (
+          <>
+            <div className="form-group">
+              <label>Frequency</label>
+              <select
+                value={frequency}
+                onChange={(e) => setFrequency(e.target.value)}
+              >
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>End Date (Optional)</label>
+              <DatePicker
+                selected={endDate}
+                onChange={(date) => setEndDate(date)}
+                dateFormat="MMMM d, yyyy"
+                minDate={new Date()}
+                isClearable
+                placeholderText="Never"
+                className="date-picker-input"
+                calendarClassName="custom-calendar"
+                customInput={
+                  <div className="custom-input">
+                    <FaCalendarAlt className="calendar-icon" />
+                    <input 
+                      value={endDate ? format(endDate, 'MMMM d, yyyy') : 'Never'} 
+                      readOnly 
+                      placeholder="Never"
+                    />
+                    <FaChevronDown className="chevron-icon" />
+                  </div>
+                }
+              />
+            </div>
+          </>
+        )}
         <button type="submit" className="add-expense-btn">
           Add Expense
         </button>

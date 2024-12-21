@@ -38,19 +38,22 @@
   border-radius: 15px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  height: auto;
 }
 
 /*added by usama*/
 .expense-tracker {
   display: flex;
   flex-direction: column;
-  max-height: 350px !important;
+  height: auto !important;
+  min-height: 350px;
 }
 
 .expense-tracker form {
   display: flex;
   flex-direction: column;
   padding: 25px;
+  height: auto;
 }
 
 /* Preserve original styling for Expense Tracker */
@@ -60,7 +63,7 @@
   border-radius: 15px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  height: 100%;
+  height: auto;
 }
 
 .expense-tracker h2,
@@ -1435,4 +1438,167 @@
 
 .dark-mode-toggle:hover svg {
   transform: rotate(12deg);
+}
+
+/* Recurring expense styles */
+.recurring-toggle {
+  margin: 15px 0;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-label input[type="checkbox"] {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.toggle-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.recurring-icon {
+  color: #8b5cf6;
+  font-size: 14px;
+}
+
+/* Dark mode styles for recurring elements */
+.dark-mode .toggle-text {
+  color: #e0e0e0;
+}
+
+.dark-mode .recurring-icon {
+  color: #a78bfa;
+}
+
+.dark-mode select {
+  background-color: #2D2D2D;
+  color: #ffffff;
+  border-color: #4a4a4a;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.dark-mode select option {
+  background-color: #2D2D2D;
+  color: #ffffff;
+}
+
+/* Checkbox styles */
+.toggle-label input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #8b5cf6;
+  border-radius: 4px;
+  outline: none;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.toggle-label input[type="checkbox"]:checked {
+  background-color: #8b5cf6;
+  border-color: #8b5cf6;
+}
+
+.toggle-label input[type="checkbox"]:checked::before {
+  content: '✓';
+  position: absolute;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.dark-mode .toggle-label input[type="checkbox"] {
+  border-color: #a78bfa;
+}
+
+.dark-mode .toggle-label input[type="checkbox"]:checked {
+  background-color: #a78bfa;
+  border-color: #a78bfa;
+}
+
+/* Recurring expense indicator */
+.recurring-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background-color: rgba(139, 92, 246, 0.1);
+  border-radius: 12px;
+  font-size: 12px;
+  color: #8b5cf6;
+  margin-left: 8px;
+}
+
+.recurring-indicator svg {
+  font-size: 10px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dark-mode .recurring-indicator {
+  background-color: rgba(167, 139, 250, 0.1);
+  color: #a78bfa;
+}
+
+/* Form styles */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #666;
+  font-size: 14px;
+}
+
+.dark-mode .form-group label {
+  color: #e0e0e0;
+}
+
+select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #D9E2EC;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #F0F4F8;
+  color: #334E68;
+  transition: all 0.3s ease;
+}
+
+select:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+.dark-mode select:focus {
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2);
 }
