@@ -788,8 +788,7 @@
 }
 
 .user-menu-content .sign-out-btn,
-.user-menu-content .sign-in-btn,
-.user-menu-content .clear-all-btn {
+.user-menu-content .sign-in-btn {
   background-color: #f3f4f6;
   color: #374151;
   border: none;
@@ -815,11 +814,6 @@
 .dark-mode .user-menu-content .sign-out-btn,
 .dark-mode .user-menu-content .sign-in-btn {
   background-color: #4a4a4a;
-  color: #ffffff;
-}
-
-.dark-mode .user-menu-content .clear-all-btn {
-  background-color: #661c1c;
   color: #ffffff;
 }
 
@@ -1207,6 +1201,10 @@
 }
 
 .dark-mode .react-datepicker__month-container {
+  background-color: #2D2D2D;
+}
+
+.dark-mode .react-datepicker__day-names {
   background-color: #2D2D2D;
 }
 

@@ -193,6 +193,7 @@ function App() {
       <div className="app-container">
         <div className="user-menu">
           <div className="user-menu-left">
+            <DarkModeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
             {loading ? (
               <div className="loading-text">Loading...</div>
             ) : user ? (
@@ -201,11 +202,6 @@ function App() {
                 <button className="sign-out-btn" onClick={signOutUser}>
                   <FaSignOutAlt /> Sign Out
                 </button>
-                {expenses.length > 0 && (
-                  <button className="clear-all-btn" onClick={clearAllExpenses}>
-                    <FaTrash /> Clear All
-                  </button>
-                )}
               </div>
             ) : (
               <div className="user-menu-content">
@@ -216,9 +212,6 @@ function App() {
               </div>
             )}
           </div>
-          <div className="user-menu-right">
-            <DarkModeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-          </div>
         </div>
         <div className="left-column">
           <div className="expense-tracker-container">
@@ -227,16 +220,13 @@ function App() {
               isUserLoggedIn={!!user} 
             />
           </div>
-          <div className="weather-widget-container">
-            <WeatherWidget />
-          </div>
         </div>
         <div className="expense-chart-container">
           <ExpenseChart 
             expenses={expenses} 
             onDeleteExpense={deleteExpense} 
             isUserLoggedIn={!!user}
-            isLoadingExpenses={isLoadingExpenses || loading} // Include auth loading state
+            isLoadingExpenses={isLoadingExpenses || loading}
           />
         </div>
       </div>
