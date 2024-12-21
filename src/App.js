@@ -325,17 +325,6 @@ function App() {
         <div className="user-menu">
           <div className="user-menu-left">
             <DarkModeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-            <select 
-              className="currency-selector"
-              value={currency.code}
-              onChange={(e) => setCurrency(currencies.find(c => c.code === e.target.value))}
-            >
-              {currencies.map(c => (
-                <option key={c.code} value={c.code}>
-                  {c.symbol} {c.code}
-                </option>
-              ))}
-            </select>
             {loading ? (
               <div className="loading-text">Loading...</div>
             ) : user ? (

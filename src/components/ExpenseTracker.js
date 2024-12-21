@@ -5,6 +5,17 @@ import { format } from 'date-fns';
 import { FaCalendarAlt, FaChevronDown, FaChevronLeft, FaChevronRight, FaSync } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
+const currencies = [
+  { code: 'USD', symbol: '$' },
+  { code: 'EUR', symbol: '€' },
+  { code: 'GBP', symbol: '£' },
+  { code: 'INR', symbol: '₹' },
+  { code: 'PKR', symbol: 'Rs' },
+  { code: 'AUD', symbol: 'A$' },
+  { code: 'CAD', symbol: 'C$' },
+  { code: 'JPY', symbol: '¥' },
+];
+
 function ExpenseTracker({ onAddExpense, isUserLoggedIn, currency }) {
   const [item, setItem] = useState('');
   const [amount, setAmount] = useState('');
@@ -40,7 +51,24 @@ function ExpenseTracker({ onAddExpense, isUserLoggedIn, currency }) {
 
   return (
     <div className="expense-tracker">
-      <h2>Expense Tracker</h2>
+      <h2>
+        Expense Tracker
+        <select 
+          className="currency-selector"
+          value={currency.code}
+          onChange={(e) => {
+            const selectedCurrency = currencies.find(c => c.code === e.target.value);
+            localStorage.setItem('currency', JSON.stringify(selectedCurrency));
+            window.location.reload();
+          }}
+        >
+          {currencies.map(c => (
+            <option key={c.code} value={c.code}>
+              {c.symbol} {c.code}
+            </option>
+          ))}
+        </select>
+      </h2>
       <form onSubmit={handleSubmit} className="expense-form">
         <div className="input-group">
           <input
