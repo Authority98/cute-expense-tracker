@@ -13,6 +13,17 @@ import './styles/LiquidLoading.css';
 import { FaSignOutAlt, FaGoogle, FaTrash } from 'react-icons/fa';
 import { addDays, addWeeks, addMonths, addYears, isBefore, isAfter } from 'date-fns';
 
+const currencies = [
+  { code: 'USD', symbol: '$' },
+  { code: 'EUR', symbol: '€' },
+  { code: 'GBP', symbol: '£' },
+  { code: 'INR', symbol: '₹' },
+  { code: 'PKR', symbol: 'Rs' },
+  { code: 'AUD', symbol: 'A$' },
+  { code: 'CAD', symbol: 'C$' },
+  { code: 'JPY', symbol: '¥' },
+];
+
 function App() {
   const [user, loading] = useAuthState(auth);
   const [expenses, setExpenses] = useState([]);
@@ -21,6 +32,10 @@ function App() {
   const [darkMode, setDarkMode] = useState(() => {
     const savedMode = localStorage.getItem('darkMode');
     return savedMode ? JSON.parse(savedMode) : false;
+  });
+  const [currency, setCurrency] = useState(() => {
+    const savedCurrency = localStorage.getItem('currency');
+    return savedCurrency ? JSON.parse(savedCurrency) : currencies.find(c => c.code === 'PKR');
   });
   const [isProcessingRecurring, setIsProcessingRecurring] = useState(false);
 
@@ -32,6 +47,10 @@ function App() {
       document.body.classList.remove('dark-mode');
     }
   }, [darkMode]);
+
+  useEffect(() => {
+    localStorage.setItem('currency', JSON.stringify(currency));
+  }, [currency]);
 
   const toggleDarkMode = () => {
     setDarkMode(prev => !prev);
@@ -306,6 +325,17 @@ function App() {
         <div className="user-menu">
           <div className="user-menu-left">
             <DarkModeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+            <select 
+              className="currency-selector"
+              value={currency.code}
+              onChange={(e) => setCurrency(currencies.find(c => c.code === e.target.value))}
+            >
+              {currencies.map(c => (
+                <option key={c.code} value={c.code}>
+                  {c.symbol} {c.code}
+                </option>
+              ))}
+            </select>
             {loading ? (
               <div className="loading-text">Loading...</div>
             ) : user ? (
@@ -329,7 +359,8 @@ function App() {
           <div className="expense-tracker-container">
             <ExpenseTracker 
               onAddExpense={addExpense} 
-              isUserLoggedIn={!!user} 
+              isUserLoggedIn={!!user}
+              currency={currency}
             />
           </div>
         </div>
@@ -339,6 +370,7 @@ function App() {
             onDeleteExpense={deleteExpense} 
             isUserLoggedIn={!!user}
             isLoadingExpenses={isLoadingExpenses || loading}
+            currency={currency}
           />
         </div>
       </div>

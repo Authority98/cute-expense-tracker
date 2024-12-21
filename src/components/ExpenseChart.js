@@ -56,7 +56,7 @@ const animateColors = {
   }
 };
 
-function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpenses }) {
+function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpenses, currency }) {
   const [selectedRange, setSelectedRange] = useState('month');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [filteredExpenses, setFilteredExpenses] = useState([]);
@@ -150,7 +150,7 @@ function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpe
             const label = context.label || '';
             const value = context.parsed || 0;
             const percentage = ((value / totalExpense) * 100).toFixed(0);
-            return `${label}: Rs ${value.toFixed(2)} (${percentage}%)`;
+            return `${label}: ${currency.symbol} ${value.toFixed(2)} (${percentage}%)`;
           },
           labelTextColor: function(context) {
             return '#666';
@@ -266,7 +266,7 @@ function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpe
                 <div key={expense.id || index} className="expense-item">
                   <span className="item-name">{expense.item}</span>
                   <div className="amount-percentage">
-                    <span className="item-amount">Rs {expense.amount.toFixed(2)}</span>
+                    <span className="item-amount">{currency.symbol} {expense.amount.toFixed(2)}</span>
                     <span 
                       className="item-percentage"
                       style={{ backgroundColor: getPercentageColor((expense.amount / totalExpense) * 100) }}

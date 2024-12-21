@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { FaCalendarAlt, FaChevronDown, FaChevronLeft, FaChevronRight, FaSync } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
-function ExpenseTracker({ onAddExpense }) {
+function ExpenseTracker({ onAddExpense, isUserLoggedIn, currency }) {
   const [item, setItem] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date());
@@ -50,13 +50,16 @@ function ExpenseTracker({ onAddExpense }) {
             placeholder="Item name"
             required
           />
-          <input
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Amount"
-            required
-          />
+          <div className="amount-input-group">
+            <span className="currency-symbol">{currency.symbol}</span>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Amount"
+              required
+            />
+          </div>
         </div>
         <div className="date-picker-wrapper">
           <DatePicker

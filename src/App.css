@@ -1602,3 +1602,58 @@ select:focus {
   border-color: #a78bfa;
   box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2);
 }
+
+.currency-selector {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-right: 10px;
+  outline: none;
+}
+
+.currency-selector:hover {
+  background-color: #e5e7eb;
+}
+
+.dark-mode .currency-selector {
+  background-color: #4a4a4a;
+  color: #ffffff;
+}
+
+.dark-mode .currency-selector:hover {
+  background-color: #5a5a5a;
+}
+
+.dark-mode .currency-selector option {
+  background-color: #2D2D2D;
+  color: #ffffff;
+}
+
+.amount-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.currency-symbol {
+  position: absolute;
+  left: 12px;
+  color: #666;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.amount-input-group input {
+  padding-left: 35px !important;
+  width: 100%;
+}
+
+.dark-mode .currency-symbol {
+  color: #e0e0e0;
+}
