@@ -163,13 +163,31 @@ function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpe
     }
   };
 
+  const getNoDataMessage = () => {
+    const now = new Date();
+    switch (selectedRange) {
+      case 'day':
+        return `No expenses found for ${format(now, 'MMMM d, yyyy')}`;
+      case 'week':
+        const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+        const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+        return `No expenses found for ${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
+      case 'month':
+        return `No expenses found for ${format(now, 'MMMM yyyy')}`;
+      case 'year':
+        return `No expenses found for ${format(now, 'yyyy')}`;
+      default:
+        return 'No expenses found for this period';
+    }
+  };
+
   const NoDataEmoji = () => (
     <div className="no-data-emoji">
       <picture>
         <source srcSet="https://fonts.gstatic.com/s/e/notoemoji/latest/1f914/512.webp" type="image/webp" />
         <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f914/512.gif" alt="🤔" width="96" height="96" />
       </picture>
-      <p>No expenses found for this period</p>
+      <p>{getNoDataMessage()}</p>
     </div>
   );
 
