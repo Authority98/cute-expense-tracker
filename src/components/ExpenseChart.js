@@ -57,34 +57,10 @@ const animateColors = {
 };
 
 function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpenses }) {
-  const [selectedRange, setSelectedRange] = useState('day');
+  const [selectedRange, setSelectedRange] = useState('month');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [filteredExpenses, setFilteredExpenses] = useState([]);
-  const [availableRanges, setAvailableRanges] = useState([]);
-  const [isDataReady, setIsDataReady] = useState(false);
-
-  useEffect(() => {
-    const now = new Date();
-    const ranges = {
-      day: { start: startOfDay(now), end: endOfDay(now) },
-      week: { start: startOfWeek(now), end: endOfWeek(now) },
-      month: { start: startOfMonth(now), end: endOfMonth(now) },
-      year: { start: startOfYear(now), end: endOfYear(now) },
-    };
-
-    const availableRanges = Object.entries(ranges).filter(([_, range]) => 
-      expenses.some(expense => {
-        const expenseDate = new Date(expense.date);
-        return isWithinInterval(expenseDate, range);
-      })
-    ).map(([key]) => key);
-
-    setAvailableRanges(availableRanges);
-
-    if (!availableRanges.includes(selectedRange)) {
-      setSelectedRange(availableRanges[0] || 'day');
-    }
-  }, [expenses, selectedRange]);
+  const [availableRanges, setAvailableRanges] = useState(['day', 'week', 'month', 'year']);
 
   useEffect(() => {
     let startDate, endDate;
@@ -96,8 +72,8 @@ function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpe
         endDate = endOfDay(now);
         break;
       case 'week':
-        startDate = startOfWeek(now);
-        endDate = endOfWeek(now);
+        startDate = startOfWeek(now, { weekStartsOn: 1 }); // Start week on Monday
+        endDate = endOfWeek(now, { weekStartsOn: 1 });
         break;
       case 'month':
         startDate = startOfMonth(now);
@@ -107,21 +83,15 @@ function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpe
         startDate = startOfYear(now);
         endDate = endOfYear(now);
         break;
-      case 'custom':
-        startDate = startOfDay(selectedDate);
-        endDate = endOfDay(selectedDate);
-        break;
       default:
-        startDate = startOfDay(now);
-        endDate = endOfDay(now);
+        startDate = startOfMonth(now);
+        endDate = endOfMonth(now);
     }
 
     const filtered = expenses.filter(expense => {
       const expenseDate = new Date(expense.date);
       return isWithinInterval(expenseDate, { start: startDate, end: endDate });
     });
-
-    console.log("Filtered expenses:", filtered);
 
     // Combine duplicate expenses
     const combined = filtered.reduce((acc, expense) => {
@@ -134,7 +104,9 @@ function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpe
       return acc;
     }, []);
 
-    setFilteredExpenses(combined);
+    // Sort by amount in descending order
+    const sorted = combined.sort((a, b) => b.amount - a.amount);
+    setFilteredExpenses(sorted);
   }, [expenses, selectedRange, selectedDate]);
 
   const totalExpense = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
@@ -178,7 +150,7 @@ function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpe
             const label = context.label || '';
             const value = context.parsed || 0;
             const percentage = ((value / totalExpense) * 100).toFixed(0);
-            return `${label}: ${value} (${percentage}%)`;
+            return `${label}: Rs ${value.toFixed(2)} (${percentage}%)`;
           },
           labelTextColor: function(context) {
             return '#666';
@@ -231,11 +203,29 @@ function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpe
     );
   }
 
+  const getRangeText = () => {
+    const now = new Date();
+    switch (selectedRange) {
+      case 'day':
+        return format(now, 'MMMM d, yyyy');
+      case 'week':
+        const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+        const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+        return `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
+      case 'month':
+        return format(now, 'MMMM yyyy');
+      case 'year':
+        return format(now, 'yyyy');
+      default:
+        return 'All items';
+    }
+  };
+
   return (
     <div className="expense-chart">
       <div className="chart-header">
         <h2>Stats</h2>
-        <span>All items</span>
+        <span>{getRangeText()}</span>
       </div>
       <>
         <div className="time-range-selector-container">
@@ -266,49 +256,46 @@ function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpe
             </button>
           </div>
         </div>
-        <div className="chart-container" style={{ position: 'relative', height: '300px', width: '100%' }}>
-          {filteredExpenses.length > 0 ? (
-            <Doughnut 
-              data={chartData}
-              options={{
-                ...options,
-                responsive: true,
-                maintainAspectRatio: false,
-              }}
-            />
-          ) : (
-            <NoDataEmoji />
-          )}
-        </div>
-        {filteredExpenses.length > 0 && (
-          <div className="expense-list">
-            <div className="expense-item total">
-              <span className="item-name">Total</span>
-              <span className="item-amount">₨ {totalExpense.toFixed(0)}</span>
+        {filteredExpenses.length > 0 ? (
+          <>
+            <div className="chart-container">
+              <Doughnut data={chartData} options={options} plugins={[animateColors]} />
             </div>
-            {filteredExpenses.map((expense, index) => {
-              const percentage = ((expense.amount / totalExpense) * 100).toFixed(0);
-              return (
-                <div key={index} className="expense-item">
+            <div className="expense-list">
+              {filteredExpenses.map((expense, index) => (
+                <div key={expense.id || index} className="expense-item">
                   <span className="item-name">{expense.item}</span>
                   <div className="amount-percentage">
-                    <span className="item-amount">₨ {expense.amount.toFixed(0)}</span>
+                    <span className="item-amount">Rs {expense.amount.toFixed(2)}</span>
                     <span 
-                      className="item-percentage" 
-                      style={{background: `linear-gradient(to right, ${getPercentageColor(percentage)}, white)`}}
+                      className="item-percentage"
+                      style={{ backgroundColor: getPercentageColor((expense.amount / totalExpense) * 100) }}
                     >
-                      {percentage}%
+                      {((expense.amount / totalExpense) * 100).toFixed(0)}%
                     </span>
                   </div>
-                  <button className="delete-btn" onClick={() => handleDeleteExpense(expense.id)}>×</button>
-                  <div className="item-bar" style={{ 
-                    width: `${percentage}%`, 
-                    background: getPercentageColor(percentage)
-                  }}></div>
+                  {expense.id && (
+                    <button 
+                      className="delete-btn"
+                      onClick={() => handleDeleteExpense(expense.id)}
+                      title="Delete expense"
+                    >
+                      ×
+                    </button>
+                  )}
+                  <div 
+                    className="item-bar" 
+                    style={{ 
+                      width: `${(expense.amount / totalExpense) * 100}%`,
+                      background: `linear-gradient(to right, ${cuteGradientColors[index % cuteGradientColors.length].join(', ')})`
+                    }}
+                  />
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <NoDataEmoji />
         )}
       </>
     </div>
