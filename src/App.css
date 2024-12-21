@@ -761,25 +761,30 @@
   top: 20px;
   right: 20px;
   z-index: 1000;
-  width: auto;
-  padding: 10px;
+  width: fit-content;
+  max-width: 300px;  /* Reduced from 400px */
+  padding: 10px 20px;
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+.user-menu-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
 .user-menu-content {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  flex-wrap: nowrap;
+  gap: 10px;
+  white-space: nowrap;
 }
 
 .user-menu-content .greeting {
   font-size: 14px;
-  margin-right: 10px;
   color: #666;
-  white-space: nowrap;
 }
 
 .user-menu-content .sign-out-btn,
@@ -795,8 +800,27 @@
   transition: background-color 0.3s ease, transform 0.2s ease;
   display: flex;
   align-items: center;
-  margin-left: 5px;
-  white-space: nowrap;
+  gap: 5px;  /* Use gap instead of margin for icon spacing */
+}
+
+/* Dark mode styles for user menu */
+.dark-mode .user-menu {
+  background-color: rgba(45, 45, 45, 0.9);
+}
+
+.dark-mode .user-menu-content .greeting {
+  color: #e0e0e0;
+}
+
+.dark-mode .user-menu-content .sign-out-btn,
+.dark-mode .user-menu-content .sign-in-btn {
+  background-color: #4a4a4a;
+  color: #ffffff;
+}
+
+.dark-mode .user-menu-content .clear-all-btn {
+  background-color: #661c1c;
+  color: #ffffff;
 }
 
 /* Mobile styles */
@@ -804,108 +828,9 @@
   .user-menu {
     top: 10px;
     right: 10px;
-    padding: 5px;
-    max-width: calc(100% - 20px); /* Ensure it doesn't overflow the screen */
+    padding: 8px 15px;
+    max-width: 300px;
   }
-
-  .user-menu-content {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    align-items: center;
-  }
-
-  .user-menu-content .greeting {
-    margin-bottom: 0;
-    margin-right: 5px;
-    font-size: 12px;
-    flex: 1 0 100%; /* Force the greeting to its own line */
-    text-align: right;
-  }
-
-  .user-menu-content button {
-    font-size: 10px;
-    padding: 6px 12px;
-    margin-left: 5px;
-    margin-top: 5px;
-  }
-
-  .app-container {
-    padding-top: 60px; /* Reduced for mobile */
-    flex-direction: column;
-    align-items: center;
-    gap: 50px !important;
-  }
-
-  .expense-tracker-container,
-  .expense-chart-container {
-    width: 100%;
-    min-width: unset !important;
-    max-width: 100%;
-  }
-
-  .expense-tracker,
-  .expense-chart {
-    width: 100%;
-  }
-}
-
-.user-menu {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
-  width: auto;
-  padding: 10px;
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.user-menu-content {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-wrap: nowrap;
-}
-
-.user-menu-content .greeting {
-  font-size: 14px;
-  margin-right: 10px;
-  color: #666;
-  white-space: nowrap;
-}
-
-.user-menu-content .sign-out-btn,
-.user-menu-content .sign-in-btn,
-.user-menu-content .clear-all-btn {
-  background-color: #f3f4f6;
-  color: #374151;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 20px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  display: flex;
-  align-items: center;
-  margin-left: 5px;
-  white-space: nowrap;
-}
-
-.user-menu-content .sign-out-btn svg,
-.user-menu-content .sign-in-btn svg,
-.user-menu-content .clear-all-btn svg {
-  margin-right: 5px; /* Add space between icon and text */
-}
-
-.user-menu-content .clear-all-btn {
-  background-color: #FFCCCB; /* Light red background */
-  color: #FF0000; /* Red text */
-}
-
-.user-menu-content .clear-all-btn:hover {
-  background-color: #FFB3B3; /* Slightly darker red on hover */
 }
 
 .app-container {
@@ -1234,80 +1159,271 @@
 
 /* Dark mode styles */
 .dark-mode {
-  background-color: #1a1a1a;
+  background-color: #2D2D2D;
   color: #ffffff;
 }
 
+/* App container dark mode */
 .dark-mode .app-container {
-  background-color: #2d2d2d;
+  background-color: #2D2D2D;
 }
 
-.dark-mode .expense-tracker-container,
-.dark-mode .expense-chart-container {
+/* Expense tracker dark mode */
+.dark-mode .expense-tracker,
+.dark-mode .expense-chart {
   background-color: #363636;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-.dark-mode input,
-.dark-mode select {
-  background-color: #2d2d2d;
+.dark-mode .expense-tracker h2,
+.dark-mode .expense-chart .chart-header {
+  background: linear-gradient(to right, #8b5cf6, #d946ef);
+  color: #ffffff;
+}
+
+/* Form inputs dark mode */
+.dark-mode .expense-form input[type="text"],
+.dark-mode .expense-form input[type="number"],
+.dark-mode .expense-form input[type="date"],
+.dark-mode .custom-input {
+  background-color: #2D2D2D;
   color: #ffffff;
   border-color: #4a4a4a;
 }
 
-.dark-mode button {
+.dark-mode .expense-form input::placeholder {
+  color: #999;
+}
+
+/* Date picker dark mode */
+.dark-mode .react-datepicker {
+  background-color: #2D2D2D;
+  border-color: #4a4a4a;
+}
+
+.dark-mode .react-datepicker__header {
+  background-color: #363636;
+  border-bottom-color: #4a4a4a;
+}
+
+.dark-mode .react-datepicker__current-month,
+.dark-mode .react-datepicker__day-name {
+  color: #ffffff;
+}
+
+.dark-mode .react-datepicker__day {
+  color: #ffffff;
+}
+
+.dark-mode .react-datepicker__day:hover {
   background-color: #4a4a4a;
+}
+
+.dark-mode .react-datepicker__day--selected {
+  background-color: #8b5cf6;
+}
+
+.dark-mode .react-datepicker__day--keyboard-selected {
+  background-color: #6d28d9;
+}
+
+/* Chart dark mode */
+.dark-mode .expense-chart .chart-header {
+  background: linear-gradient(to right, #8b5cf6, #d946ef);
+}
+
+.dark-mode .time-range-selector {
+  background-color: rgba(255, 255, 255, 0.1); /* Subtle background */
+}
+
+.dark-mode .time-range-selector button {
+  color: #ffffff;
+  background-color: transparent; /* Remove background */
+}
+
+.dark-mode .time-range-selector button.active {
+  background-color: rgba(255, 255, 255, 0.2); /* Subtle background for active state */
   color: #ffffff;
 }
 
-.dark-mode button:hover {
-  background-color: #5a5a5a;
+.dark-mode .time-range-selector button:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.05); /* Very subtle hover effect */
 }
 
-.dark-mode .dark-mode-toggle {
-  background: transparent;
+/* Loading and no data states dark mode */
+.dark-mode .loading-indicator p,
+.dark-mode .no-data-emoji p {
+  color: #ffffff;
+}
+
+/* Expense list dark mode */
+.dark-mode .expense-list {
+  color: #ffffff;
+}
+
+.dark-mode .expense-item {
+  border-bottom-color: #4a4a4a;
+}
+
+.dark-mode .item-percentage {
+  background-color: #4a4a4a;
+  color: #333333; /* Keep text color dark */
+}
+
+/* Chart tooltip dark mode */
+.dark-mode .chartjs-tooltip {
+  background-color: #2D2D2D !important;
+  border-color: #4a4a4a !important;
+}
+
+.dark-mode .chartjs-tooltip-key {
+  border-color: #4a4a4a !important;
+}
+
+/* Toast notifications dark mode */
+.dark-mode .Toastify__toast {
+  background-color: #2D2D2D;
+  color: #ffffff;
+}
+
+.dark-mode .Toastify__close-button {
+  color: #ffffff;
+}
+
+/* Buttons dark mode */
+.dark-mode .add-expense-btn,
+.dark-mode button:not(.dark-mode-toggle):not(.time-range-selector button) {
+  background-color: #8b5cf6;
+  color: #ffffff;
+}
+
+.dark-mode .add-expense-btn:hover,
+.dark-mode button:not(.dark-mode-toggle):not(.time-range-selector button):hover {
+  background-color: #7c3aed;
+}
+
+/* Custom calendar header dark mode */
+.dark-mode .custom-header {
+  background: linear-gradient(to right, #8b5cf6, #d946ef);
+  color: #ffffff;
+}
+
+.dark-mode .month-nav-icon {
+  color: #ffffff;
+}
+
+/* Custom input dark mode */
+.dark-mode .custom-input {
+  background: linear-gradient(to right, #8b5cf6, #d946ef);
+  color: #ffffff;
+}
+
+.dark-mode .custom-input input {
+  color: #ffffff;
+}
+
+.dark-mode .calendar-icon,
+.dark-mode .chevron-icon {
+  color: #ffffff;
+}
+
+/* Add a new style for the percentage pill background in dark mode */
+.dark-mode .expense-item .item-percentage {
+  background-color: #e0e0e0; /* Light background for better contrast */
+  color: #333333; /* Dark text color */
+}
+
+/* Time range selector styles */
+.time-range-selector {
+  display: inline-flex;
+  background-color: #f0f0f0;
+  border-radius: 20px;
+  padding: 5px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.time-range-selector button {
+  background-color: transparent;
   border: none;
-  color: #ffffff;
+  padding: 8px 16px;
   cursor: pointer;
-  padding: 8px;
-  font-size: 1.2rem;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  border-radius: 15px;
 }
 
-.dark-mode .dark-mode-toggle:hover {
-  color: #ffd700;
+.time-range-selector button.active {
+  background-color: #ffffff;
+  color: #333;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* Light mode toggle button */
+.time-range-selector button:hover:not(.active) {
+  background-color: rgba(255,255,255,0.5);
+}
+
+/* Dark mode time range selector */
+.dark-mode .time-range-selector {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .time-range-selector button {
+  color: rgba(255, 255, 255, 0.8);
+  background-color: transparent;
+}
+
+.dark-mode .time-range-selector button.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.dark-mode .time-range-selector button:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Dark mode toggle button */
 .dark-mode-toggle {
   background: transparent;
   border: none;
-  color: #333333;
   cursor: pointer;
-  padding: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.2rem;
-  transition: color 0.3s ease;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  color: #ffd43b;
 }
 
 .dark-mode-toggle:hover {
-  color: #666666;
+  transform: scale(1.1);
+  background-color: rgba(255, 212, 59, 0.1);
 }
 
-/* User menu layout */
-.user-menu {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  width: 100%;
+.dark-mode-toggle:active {
+  transform: scale(0.95);
 }
 
-.user-menu-left {
-  display: flex;
-  align-items: center;
+/* Dark mode specific toggle */
+.dark-mode .dark-mode-toggle {
+  color: #f1c40f;
 }
 
-.user-menu-right {
-  display: flex;
-  align-items: center;
+.dark-mode .dark-mode-toggle:hover {
+  background-color: rgba(241, 196, 15, 0.1);
+}
+
+/* Animation for icon switch */
+.dark-mode-toggle svg {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark-mode-toggle:hover svg {
+  transform: rotate(12deg);
 }
