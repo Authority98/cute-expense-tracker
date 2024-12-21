@@ -1729,3 +1729,67 @@ select:focus {
 .dark-mode .amount-input-group .currency-symbol {
   color: #e0e0e0;
 }
+
+.chart-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.chart-type-selector {
+  display: inline-flex;
+  background-color: #f0f0f0;
+  border-radius: 20px;
+  padding: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.chart-type-selector button {
+  background-color: transparent;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  border-radius: 15px;
+}
+
+.chart-type-selector button.active {
+  background-color: #ffffff;
+  color: #333;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.chart-type-selector button:hover:not(.active) {
+  background-color: rgba(255,255,255,0.5);
+}
+
+.dark-mode .chart-type-selector {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .chart-type-selector button {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dark-mode .chart-type-selector button.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.dark-mode .chart-type-selector button:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 0 20px;
+}

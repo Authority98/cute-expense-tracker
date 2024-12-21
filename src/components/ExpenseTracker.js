@@ -52,7 +52,7 @@ function ExpenseTracker({ onAddExpense, isUserLoggedIn, currency }) {
   return (
     <div className="expense-tracker">
       <h2>
-        Expense Tracker
+        <span>Expense Tracker</span>
         <select 
           className="currency-selector"
           value={currency.code}
