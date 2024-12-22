@@ -1,17 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { PolarArea, Line, Bar } from 'react-chartjs-2';
+import { PolarArea } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   ArcElement,
   Tooltip,
   Legend,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
   RadialLinearScale,
-  Title
 } from 'chart.js';
 import {
   format,
@@ -24,11 +18,7 @@ import {
   endOfMonth,
   endOfYear,
   isWithinInterval,
-  subMonths,
-  eachDayOfInterval,
-  eachMonthOfInterval,
   isSameDay,
-  isSameMonth
 } from 'date-fns';
 import { toast } from 'react-toastify';
 
@@ -36,13 +26,7 @@ ChartJS.register(
   ArcElement,
   Tooltip,
   Legend,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
   RadialLinearScale,
-  Title
 );
 
 const cuteGradientColors = [
@@ -56,125 +40,6 @@ const cuteGradientColors = [
 const getPercentageColor = (percentage) => {
   const hue = ((100 - percentage) * 120 / 100).toFixed(0);
   return `hsl(${hue}, 80%, 80%)`;
-};
-
-const animateColors = {
-  id: 'animateColors',
-  beforeDraw: (chart) => {
-    const ctx = chart.ctx;
-    const chartArea = chart.chartArea;
-    const centerX = (chartArea.left + chartArea.right) / 2;
-    const centerY = (chartArea.top + chartArea.bottom) / 2;
-    const radius = Math.min(chartArea.right - chartArea.left, chartArea.bottom - chartArea.top) / 2;
-
-    chart.data.datasets[0].data.forEach((value, index) => {
-      const startAngle = chart._metasets[0].data[index].startAngle;
-      const endAngle = chart._metasets[0].data[index].endAngle;
-      
-      // Create a linear gradient
-      const gradient = ctx.createLinearGradient(
-        centerX + Math.cos(startAngle) * radius,
-        centerY + Math.sin(startAngle) * radius,
-        centerX + Math.cos(endAngle) * radius,
-        centerY + Math.sin(endAngle) * radius
-      );
-      
-      const colors = cuteGradientColors[index % cuteGradientColors.length];
-      gradient.addColorStop(0, colors[0]);
-      gradient.addColorStop(1, colors[1]);
-      
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(centerX, centerY);
-      ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-      ctx.closePath();
-      ctx.fillStyle = gradient;
-      ctx.fill();
-      ctx.restore();
-    });
-  }
-};
-
-// Helper functions for data preparation - moved outside component
-const prepareTrendData = (range, now, expenses) => {
-  let dates = [];
-  let data = [];
-
-  switch (range) {
-    case 'day':
-      // For day view, show hourly trend
-      dates = Array.from({ length: 24 }, (_, i) => {
-        const date = new Date(now);
-        date.setHours(i, 0, 0, 0);
-        return date;
-      });
-      data = dates.map(date => {
-        const hourExpenses = expenses.filter(expense => {
-          const expenseDate = new Date(expense.date);
-          return expenseDate.getHours() === date.getHours() &&
-                 isSameDay(expenseDate, date);
-        });
-        return hourExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-      });
-      break;
-
-    case 'week':
-      // For week view, show daily trend
-      const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-      const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
-      dates = eachDayOfInterval({ start: weekStart, end: weekEnd });
-      data = dates.map(date => {
-        const dayExpenses = expenses.filter(expense => 
-          isSameDay(new Date(expense.date), date)
-        );
-        return dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-      });
-      break;
-
-    case 'month':
-      // For month view, show daily trend
-      const monthStart = startOfMonth(now);
-      const monthEnd = endOfMonth(now);
-      dates = eachDayOfInterval({ start: monthStart, end: monthEnd });
-      data = dates.map(date => {
-        const dayExpenses = expenses.filter(expense => 
-          isSameDay(new Date(expense.date), date)
-        );
-        return dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-      });
-      break;
-
-    case 'year':
-      // For year view, show monthly trend
-      const yearStart = startOfYear(now);
-      const yearEnd = endOfYear(now);
-      dates = eachMonthOfInterval({ start: yearStart, end: yearEnd });
-      data = dates.map(date => {
-        const monthExpenses = expenses.filter(expense => 
-          isSameMonth(new Date(expense.date), date)
-        );
-        return monthExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-      });
-      break;
-
-    default:
-      break;
-  }
-
-  return { dates, data };
-};
-
-const prepareComparisonData = (now, expenses) => {
-  const months = Array.from({ length: 6 }, (_, i) => subMonths(now, i)).reverse();
-  
-  const data = months.map(month => {
-    const monthExpenses = expenses.filter(expense => 
-      isSameMonth(new Date(expense.date), month)
-    );
-    return monthExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-  });
-
-  return { months, data };
 };
 
 // Custom hooks for chart data
@@ -219,171 +84,12 @@ const hexToRgb = (hex) => {
     '0, 0, 0';
 };
 
-const useTrendData = (expenses, selectedRange) => {
-  return useMemo(() => {
-    const now = new Date();
-    const emptyData = {
-      labels: [],
-      datasets: [{
-        label: 'Expenses',
-        data: [],
-        borderColor: '#a855f7',
-        backgroundColor: 'rgba(168, 85, 247, 0.1)',
-        tension: 0.4,
-        fill: true
-      }]
-    };
-
-    if (!expenses || expenses.length === 0 || !selectedRange) {
-      return emptyData;
-    }
-
-    const { dates, data } = prepareTrendData(selectedRange, now, expenses);
-
-    return {
-      labels: dates.map(date => {
-        switch (selectedRange) {
-          case 'day':
-            return format(date, 'HH:00');
-          case 'week':
-            return format(date, 'EEE');
-          case 'month':
-            return format(date, 'd');
-          case 'year':
-            return format(date, 'MMM');
-          default:
-            return '';
-        }
-      }),
-      datasets: [{
-        label: 'Expenses',
-        data: data,
-        borderColor: '#a855f7',
-        backgroundColor: 'rgba(168, 85, 247, 0.1)',
-        tension: 0.4,
-        fill: true
-      }]
-    };
-  }, [expenses, selectedRange]);
-};
-
-const useComparisonData = (expenses) => {
-  return useMemo(() => {
-    const now = new Date();
-    const emptyData = {
-      labels: [],
-      datasets: [{
-        label: 'Monthly Expenses',
-        data: [],
-        backgroundColor: [],
-        borderRadius: 8
-      }]
-    };
-
-    if (!expenses || expenses.length === 0) {
-      return emptyData;
-    }
-
-    const { months, data } = prepareComparisonData(now, expenses);
-
-    return {
-      labels: months.map(date => format(date, 'MMM yyyy')),
-      datasets: [{
-        label: 'Monthly Expenses',
-        data: data,
-        backgroundColor: months.map((_, index) => {
-          const colors = cuteGradientColors[index % cuteGradientColors.length];
-          return colors[0];
-        }),
-        borderRadius: 8
-      }]
-    };
-  }, [expenses]);
-};
-
-// Add these styles at the beginning of the file, after the imports
-const styles = {
-  chartControls: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1.5rem',
-    marginBottom: '2rem',
-  },
-  timeRangeSelector: {
-    display: 'flex',
-    gap: '0.5rem',
-    padding: '0.5rem',
-    backgroundColor: '#f3f4f6',
-    borderRadius: '0.75rem',
-  },
-  chartTypeSelector: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '1rem',
-    padding: '0.5rem',
-  },
-  chartTypeBtn: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    padding: '1rem',
-    backgroundColor: '#ffffff',
-    border: '1px solid #e5e7eb',
-    borderRadius: '0.75rem',
-    transition: 'all 0.2s ease',
-    cursor: 'pointer',
-    '&:hover': {
-      backgroundColor: '#f9fafb',
-      transform: 'translateY(-2px)',
-    },
-    '&.active': {
-      borderColor: '#a855f7',
-      backgroundColor: '#faf5ff',
-      boxShadow: '0 4px 6px -1px rgba(168, 85, 247, 0.1), 0 2px 4px -1px rgba(168, 85, 247, 0.06)',
-    },
-  },
-  chartIcon: {
-    fontSize: '1.5rem',
-    marginBottom: '0.5rem',
-  },
-  chartLabel: {
-    fontSize: '1rem',
-    fontWeight: '600',
-    color: '#1f2937',
-    marginBottom: '0.25rem',
-  },
-  chartDescription: {
-    fontSize: '0.875rem',
-    color: '#6b7280',
-  },
-  chartSection: {
-    backgroundColor: '#ffffff',
-    borderRadius: '1rem',
-    padding: '1.5rem',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-  },
-  chartSectionTitle: {
-    fontSize: '1.25rem',
-    fontWeight: '600',
-    color: '#1f2937',
-    marginBottom: '0.5rem',
-  },
-  chartSectionDescription: {
-    fontSize: '0.875rem',
-    color: '#6b7280',
-    marginBottom: '1.5rem',
-  },
-};
-
 function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpenses, currency }) {
   const [selectedRange, setSelectedRange] = useState('month');
-  const [selectedChart, setSelectedChart] = useState('doughnut');
   const [filteredExpenses, setFilteredExpenses] = useState([]);
 
   // Use custom hooks for chart data
   const chartData = useChartData(filteredExpenses);
-  const trendData = useTrendData(expenses, selectedRange);
-  const comparisonData = useComparisonData(expenses);
 
   useEffect(() => {
     let startDate, endDate;
@@ -572,83 +278,6 @@ function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpe
     }
   };
 
-  // Chart options
-  const trendOptions = {
-    responsive: true,
-    maintainAspectRatio: true,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        titleColor: '#333',
-        bodyColor: '#666',
-        bodyFont: { size: 14 },
-        borderColor: '#ccc',
-        borderWidth: 1,
-        caretSize: 10,
-        cornerRadius: 15,
-        padding: 15,
-        boxPadding: 5,
-        callbacks: {
-          label: function(context) {
-            return `${currency.symbol} ${context.parsed.y.toFixed(2)}`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: {
-        grid: { display: false }
-      },
-      y: {
-        beginAtZero: true,
-        ticks: {
-          callback: function(value) {
-            return `${currency.symbol} ${value}`;
-          }
-        }
-      }
-    }
-  };
-
-  const comparisonOptions = {
-    responsive: true,
-    maintainAspectRatio: true,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        titleColor: '#333',
-        bodyColor: '#666',
-        bodyFont: { size: 14 },
-        borderColor: '#ccc',
-        borderWidth: 1,
-        caretSize: 10,
-        cornerRadius: 15,
-        padding: 15,
-        boxPadding: 5,
-        callbacks: {
-          label: function(context) {
-            return `${currency.symbol} ${context.parsed.y.toFixed(2)}`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: {
-        grid: { display: false }
-      },
-      y: {
-        beginAtZero: true,
-        ticks: {
-          callback: function(value) {
-            return `${currency.symbol} ${value}`;
-          }
-        }
-      }
-    }
-  };
-
   return (
     <div className="expense-chart">
       <div className="chart-header">
@@ -656,9 +285,9 @@ function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpe
         <span>{getRangeText()}</span>
       </div>
       <>
-        <div style={styles.chartControls}>
+        <div className="chart-controls">
           <div className="time-range-selector-container">
-            <div style={styles.timeRangeSelector}>
+            <div className="time-range-selector">
               <button 
                 className={selectedRange === 'day' ? 'active' : ''} 
                 onClick={() => setSelectedRange('day')}
@@ -685,66 +314,11 @@ function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpe
               </button>
             </div>
           </div>
-          <div style={styles.chartTypeSelector}>
-            <button
-              style={{
-                ...styles.chartTypeBtn,
-                ...(selectedChart === 'doughnut' && styles.chartTypeBtn['&.active']),
-              }}
-              onClick={() => setSelectedChart('doughnut')}
-            >
-              <span style={styles.chartIcon}>📊</span>
-              <span style={styles.chartLabel}>Distribution</span>
-              <span style={styles.chartDescription}>View expense breakdown</span>
-            </button>
-            <button
-              style={{
-                ...styles.chartTypeBtn,
-                ...(selectedChart === 'trend' && styles.chartTypeBtn['&.active']),
-              }}
-              onClick={() => setSelectedChart('trend')}
-            >
-              <span style={styles.chartIcon}>📈</span>
-              <span style={styles.chartLabel}>Trend</span>
-              <span style={styles.chartDescription}>Track spending patterns</span>
-            </button>
-            <button
-              style={{
-                ...styles.chartTypeBtn,
-                ...(selectedChart === 'comparison' && styles.chartTypeBtn['&.active']),
-              }}
-              onClick={() => setSelectedChart('comparison')}
-            >
-              <span style={styles.chartIcon}>📊</span>
-              <span style={styles.chartLabel}>Comparison</span>
-              <span style={styles.chartDescription}>Compare monthly totals</span>
-            </button>
-          </div>
         </div>
         {filteredExpenses.length > 0 ? (
           <>
             <div className="chart-container">
-              {selectedChart === 'doughnut' && (
-                <div style={styles.chartSection}>
-                  <h3 style={styles.chartSectionTitle}>Expense Distribution</h3>
-                  <p style={styles.chartSectionDescription}>How your money is distributed across different categories</p>
-                  <PolarArea data={chartData} options={options} />
-                </div>
-              )}
-              {selectedChart === 'trend' && (
-                <div style={styles.chartSection}>
-                  <h3 style={styles.chartSectionTitle}>Spending Trend</h3>
-                  <p style={styles.chartSectionDescription}>How your expenses change over time</p>
-                  <Line data={trendData} options={trendOptions} />
-                </div>
-              )}
-              {selectedChart === 'comparison' && (
-                <div style={styles.chartSection}>
-                  <h3 style={styles.chartSectionTitle}>Monthly Comparison</h3>
-                  <p style={styles.chartSectionDescription}>Compare your expenses across different months</p>
-                  <Bar data={comparisonData} options={comparisonOptions} />
-                </div>
-              )}
+              <PolarArea data={chartData} options={options} />
             </div>
             <div className="expense-list">
               {filteredExpenses.map((expense, index) => (
