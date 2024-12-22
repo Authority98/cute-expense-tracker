@@ -301,6 +301,80 @@ const useComparisonData = (expenses) => {
   }, [expenses]);
 };
 
+// Add these styles at the beginning of the file, after the imports
+const styles = {
+  chartControls: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+    marginBottom: '2rem',
+  },
+  timeRangeSelector: {
+    display: 'flex',
+    gap: '0.5rem',
+    padding: '0.5rem',
+    backgroundColor: '#f3f4f6',
+    borderRadius: '0.75rem',
+  },
+  chartTypeSelector: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '1rem',
+    padding: '0.5rem',
+  },
+  chartTypeBtn: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    padding: '1rem',
+    backgroundColor: '#ffffff',
+    border: '1px solid #e5e7eb',
+    borderRadius: '0.75rem',
+    transition: 'all 0.2s ease',
+    cursor: 'pointer',
+    '&:hover': {
+      backgroundColor: '#f9fafb',
+      transform: 'translateY(-2px)',
+    },
+    '&.active': {
+      borderColor: '#a855f7',
+      backgroundColor: '#faf5ff',
+      boxShadow: '0 4px 6px -1px rgba(168, 85, 247, 0.1), 0 2px 4px -1px rgba(168, 85, 247, 0.06)',
+    },
+  },
+  chartIcon: {
+    fontSize: '1.5rem',
+    marginBottom: '0.5rem',
+  },
+  chartLabel: {
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: '0.25rem',
+  },
+  chartDescription: {
+    fontSize: '0.875rem',
+    color: '#6b7280',
+  },
+  chartSection: {
+    backgroundColor: '#ffffff',
+    borderRadius: '1rem',
+    padding: '1.5rem',
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+  },
+  chartSectionTitle: {
+    fontSize: '1.25rem',
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: '0.5rem',
+  },
+  chartSectionDescription: {
+    fontSize: '0.875rem',
+    color: '#6b7280',
+    marginBottom: '1.5rem',
+  },
+};
+
 function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpenses, currency }) {
   const [selectedRange, setSelectedRange] = useState('month');
   const [selectedChart, setSelectedChart] = useState('doughnut');
@@ -582,9 +656,9 @@ function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpe
         <span>{getRangeText()}</span>
       </div>
       <>
-        <div className="chart-controls">
+        <div style={styles.chartControls}>
           <div className="time-range-selector-container">
-            <div className="time-range-selector">
+            <div style={styles.timeRangeSelector}>
               <button 
                 className={selectedRange === 'day' ? 'active' : ''} 
                 onClick={() => setSelectedRange('day')}
@@ -611,24 +685,39 @@ function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpe
               </button>
             </div>
           </div>
-          <div className="chart-type-selector">
+          <div style={styles.chartTypeSelector}>
             <button
-              className={selectedChart === 'doughnut' ? 'active' : ''}
+              style={{
+                ...styles.chartTypeBtn,
+                ...(selectedChart === 'doughnut' && styles.chartTypeBtn['&.active']),
+              }}
               onClick={() => setSelectedChart('doughnut')}
             >
-              Distribution
+              <span style={styles.chartIcon}>📊</span>
+              <span style={styles.chartLabel}>Distribution</span>
+              <span style={styles.chartDescription}>View expense breakdown</span>
             </button>
             <button
-              className={selectedChart === 'trend' ? 'active' : ''}
+              style={{
+                ...styles.chartTypeBtn,
+                ...(selectedChart === 'trend' && styles.chartTypeBtn['&.active']),
+              }}
               onClick={() => setSelectedChart('trend')}
             >
-              Trend
+              <span style={styles.chartIcon}>📈</span>
+              <span style={styles.chartLabel}>Trend</span>
+              <span style={styles.chartDescription}>Track spending patterns</span>
             </button>
             <button
-              className={selectedChart === 'comparison' ? 'active' : ''}
+              style={{
+                ...styles.chartTypeBtn,
+                ...(selectedChart === 'comparison' && styles.chartTypeBtn['&.active']),
+              }}
               onClick={() => setSelectedChart('comparison')}
             >
-              Comparison
+              <span style={styles.chartIcon}>📊</span>
+              <span style={styles.chartLabel}>Comparison</span>
+              <span style={styles.chartDescription}>Compare monthly totals</span>
             </button>
           </div>
         </div>
@@ -636,13 +725,25 @@ function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpe
           <>
             <div className="chart-container">
               {selectedChart === 'doughnut' && (
-                <PolarArea data={chartData} options={options} />
+                <div style={styles.chartSection}>
+                  <h3 style={styles.chartSectionTitle}>Expense Distribution</h3>
+                  <p style={styles.chartSectionDescription}>How your money is distributed across different categories</p>
+                  <PolarArea data={chartData} options={options} />
+                </div>
               )}
               {selectedChart === 'trend' && (
-                <Line data={trendData} options={trendOptions} />
+                <div style={styles.chartSection}>
+                  <h3 style={styles.chartSectionTitle}>Spending Trend</h3>
+                  <p style={styles.chartSectionDescription}>How your expenses change over time</p>
+                  <Line data={trendData} options={trendOptions} />
+                </div>
               )}
               {selectedChart === 'comparison' && (
-                <Bar data={comparisonData} options={comparisonOptions} />
+                <div style={styles.chartSection}>
+                  <h3 style={styles.chartSectionTitle}>Monthly Comparison</h3>
+                  <p style={styles.chartSectionDescription}>Compare your expenses across different months</p>
+                  <Bar data={comparisonData} options={comparisonOptions} />
+                </div>
               )}
             </div>
             <div className="expense-list">
