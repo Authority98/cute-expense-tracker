@@ -303,10 +303,8 @@ const useComparisonData = (expenses) => {
 
 function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpenses, currency }) {
   const [selectedRange, setSelectedRange] = useState('month');
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [filteredExpenses, setFilteredExpenses] = useState([]);
   const [selectedChart, setSelectedChart] = useState('doughnut');
-  const [availableRanges, setAvailableRanges] = useState(['day', 'week', 'month', 'year']);
+  const [filteredExpenses, setFilteredExpenses] = useState([]);
 
   // Use custom hooks for chart data
   const chartData = useChartData(filteredExpenses);
@@ -358,7 +356,7 @@ function ExpenseChart({ expenses, onDeleteExpense, isUserLoggedIn, isLoadingExpe
     // Sort by amount in descending order
     const sorted = combined.sort((a, b) => b.amount - a.amount);
     setFilteredExpenses(sorted);
-  }, [expenses, selectedRange, selectedDate]);
+  }, [expenses, selectedRange]);
 
   const totalExpense = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
 
